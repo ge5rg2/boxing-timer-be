@@ -1,0 +1,13 @@
+__pycache__
+app.egg-info
+*.pyc
+.mypy_cache
+.coverage
+htmlcov
+.cache
+.venv
+pgdata
+cert/
+.env
+.idea
+.vscode
