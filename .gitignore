@@ -11,3 +11,4 @@ cert/
 .env
 .idea
 .vscode
+commit_msg.txt

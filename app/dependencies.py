@@ -5,9 +5,18 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
 from app.core.security import verify_token
+from fastapi import Header
 
 security = HTTPBearer(auto_error=False)
 
+def get_session_id(x_session_id: Optional[str] = Header(None)) -> str:
+    """세션 ID 조회 또는 생성"""
+    if x_session_id:
+        return x_session_id
+    else:
+        # 새 세션 ID 생성
+        import uuid
+        return str(uuid.uuid4())
 
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),

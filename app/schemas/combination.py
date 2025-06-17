@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # 컴비네이션 생성
@@ -23,6 +23,8 @@ class CombinationUpdate(BaseModel):
 
 # 컴비네이션 응답
 class CombinationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: Optional[str]
@@ -32,12 +34,12 @@ class CombinationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        from_attributes = True
 
 
 # 컴비네이션 템플릿 응답
 class CombinationTemplateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: Optional[str]
@@ -46,5 +48,3 @@ class CombinationTemplateResponse(BaseModel):
     category: Optional[str]
     difficulty_level: str
     
-    class Config:
-        from_attributes = True

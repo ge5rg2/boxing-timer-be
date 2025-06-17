@@ -46,7 +46,7 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
     
     token_response = TokenResponse(
         access_token=access_token,
-        user=UserResponse.from_orm(new_user)
+        user=UserResponse.model_validate(new_user)
     )
     
     return ApiResponse(
@@ -79,7 +79,7 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
     
     token_response = TokenResponse(
         access_token=access_token,
-        user=UserResponse.from_orm(user)
+        user=UserResponse.model_validate(user)
     )
     
     return ApiResponse(

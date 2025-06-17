@@ -15,7 +15,6 @@ class User(Base):
     profile_image_url = Column(String(500))  # 프로필 이미지
     signup_method = Column(String(20), default='email')  # 가입 방법 구분
     is_email_verified = Column(Boolean, default=False)  # 이메일 인증 여부
-    oauth_accounts = relationship("UserOAuthAccount")  # OAuth 계정 연결
     is_premium = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -26,6 +25,7 @@ class User(Base):
     combinations = relationship("UserCombination", back_populates="user")
     subscriptions = relationship("Subscription", back_populates="user")
     workout_logs = relationship("WorkoutLog", back_populates="user")
+    oauth_accounts = relationship("UserOAuthAccount", back_populates="user")  # OAuth 계정 연결
 
 
 class Subscription(Base):

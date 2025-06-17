@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # 라운드 생성/업데이트
@@ -17,14 +17,14 @@ class RoundUpdate(BaseModel):
 
 # 라운드 응답
 class RoundResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     round_number: int
     duration_seconds: int
     rest_seconds: int
     created_at: datetime
     
-    class Config:
-        from_attributes = True
 
 
 # 라운드 컴비네이션 생성/업데이트
@@ -43,14 +43,14 @@ class RoundCombinationUpdate(BaseModel):
 
 # 라운드 컴비네이션 응답
 class RoundCombinationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_combination_id: int
     start_time: int
     duration: int
     execution_order: int
     
-    class Config:
-        from_attributes = True
 
 
 # 사이클 생성
@@ -71,6 +71,8 @@ class CycleUpdate(BaseModel):
 
 # 사이클 응답 (라운드 포함)
 class CycleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: Optional[str]
@@ -81,12 +83,13 @@ class CycleResponse(BaseModel):
     updated_at: datetime
     rounds: List[RoundResponse] = []
     
-    class Config:
-        from_attributes = True
+
 
 
 # 사이클 목록 응답 (간단 버전)
 class CycleListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: Optional[str]
@@ -94,12 +97,13 @@ class CycleListResponse(BaseModel):
     usage_count: Optional[int]
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+
 
 
 # 템플릿 응답
 class CycleTemplateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: Optional[str]
@@ -108,6 +112,3 @@ class CycleTemplateResponse(BaseModel):
     difficulty_level: str
     category: Optional[str]
     is_premium_only: bool
-    
-    class Config:
-        from_attributes = True

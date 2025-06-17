@@ -4,26 +4,28 @@ from sqlalchemy.sql import func
 from app.database import Base
 
 
+
+# 1. 모델 수정 (user_cycles 테이블)
 class UserCycle(Base):
     """사용자 정의 사이클 모델"""
     __tablename__ = "user_cycles"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)  # null 허용으로 비회원 지원
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    session_id = Column(String(100), nullable=True, index=True)  # 비회원용 세션 ID 추가
     title = Column(String(255), nullable=False)
     description = Column(Text)
     total_rounds = Column(Integer, nullable=False)
     usage_count = Column(Integer, nullable=True)
-    cycle_rest_seconds = Column(Integer, default=60)  # 사이클 간 휴식 시간
+    cycle_rest_seconds = Column(Integer, default=60)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    deleted_at = Column(DateTime(timezone=True), nullable=True)  # soft delete
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     # 관계 설정
     user = relationship("User", back_populates="cycles")
     rounds = relationship("UserRound", back_populates="cycle", cascade="all, delete-orphan")
     workout_logs = relationship("WorkoutLog", back_populates="user_cycle")
-
 
 class UserRound(Base):
     """사용자 정의 라운드 모델"""
