@@ -1,19 +1,26 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
-from app.schemas import UserRegister, UserLogin, PasswordChange, TokenResponse, UserResponse, ApiResponse
+from app.schemas.user import UserRegister, UserLogin, PasswordChange, TokenResponse, UserResponse
+from app.schemas.response import ApiResponse
 from app.core.security import verify_password, get_password_hash, create_access_token
 from app.dependencies import get_current_user_required
+from app.services.guest_migration_service import GuestDataMigrationService
 from app.config import settings
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=ApiResponse[TokenResponse])
-async def register(user_data: UserRegister, db: Session = Depends(get_db)):
-    """사용자 등록"""
+async def register(
+    user_data: UserRegister, 
+    session_id: Optional[str] = Header(None, alias="X-Session-ID"),
+    db: Session = Depends(get_db)
+):
+    """사용자 등록 (비회원 데이터 자동 마이그레이션 포함)"""
     # 이메일 중복 확인
     existing_user = db.query(User).filter(
         User.email == user_data.email,
@@ -30,12 +37,41 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
         email=user_data.email,
-        password_hash=hashed_password
+        password_hash=hashed_password,
+        signup_method="email",
+        is_email_verified=False  # 실제로는 이메일 인증 프로세스 필요
     )
     
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # 비회원 데이터 자동 마이그레이션
+    migration_result = None
+    migration_message = ""
+    
+    if session_id:
+        try:
+            migration_service = GuestDataMigrationService(db)
+            
+            # 마이그레이션할 데이터가 있는지 확인
+            preview = migration_service.preview_migration_data(session_id)
+            if preview.get("has_data", False):
+                migration_result = migration_service.migrate_guest_data_to_user(session_id, new_user)
+                
+                total_migrated = (
+                    migration_result["cycles_migrated"] + 
+                    migration_result["combinations_migrated"] + 
+                    migration_result["workout_logs_migrated"]
+                )
+                
+                if total_migrated > 0:
+                    migration_message = f" ({total_migrated}개 데이터 자동 이전)"
+                    
+        except Exception as e:
+            # 마이그레이션 실패해도 회원가입은 성공으로 처리
+            print(f"Migration failed during registration for user {new_user.id}: {e}")
+            migration_message = " (데이터 이전 실패)"
     
     # JWT 토큰 생성
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -49,8 +85,10 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
         user=UserResponse.model_validate(new_user)
     )
     
+    message = f"User registered successfully{migration_message}"
+    
     return ApiResponse(
-        message="User registered successfully",
+        message=message,
         data=token_response
     )
 
@@ -79,7 +117,7 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
     
     token_response = TokenResponse(
         access_token=access_token,
-        user=UserResponse.model_validate(user)
+        user=UserResponse.from_orm(user)
     )
     
     return ApiResponse(

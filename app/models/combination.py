@@ -12,6 +12,7 @@ class UserCombination(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)  # null 허용으로 비회원 지원
     title = Column(String(255), nullable=False)
     description = Column(Text)
+    session_id = Column(String(100), nullable=True, index=True)  # ✅ 추가
     audio_url = Column(String(500))
     audio_duration_seconds = Column(Integer)  # 음성 파일 길이
     audio_file_size = Column(Integer)  # 파일 크기 (bytes)

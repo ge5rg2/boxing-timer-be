@@ -28,10 +28,15 @@ class UserUpdate(BaseModel):
 
 # 사용자 응답 모델
 class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)  # Pydantic v2 방식
+    
     id: int
     email: str
+    name: Optional[str] = None                
+    profile_image_url: Optional[str] = None   
     is_premium: bool
+    is_email_verified: bool                   
+    signup_method: str                        
     created_at: datetime
     updated_at: datetime
     

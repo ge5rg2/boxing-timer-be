@@ -5,6 +5,8 @@ from .cycle import (
 )
 from .combination import UserCombination, CombinationTemplate
 from .workout import WorkoutLog, WorkoutRoundLog
+from .oauth import OAuthProvider, UserOAuthAccount
+from .migration import MigrationLog
 
 __all__ = [
     "User",
@@ -19,4 +21,7 @@ __all__ = [
     "CombinationTemplate",
     "WorkoutLog",
     "WorkoutRoundLog",
+    "OAuthProvider",
+    "UserOAuthAccount",
+    "MigrationLog",
 ]

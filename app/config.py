@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # JWT 설정
     secret_key: str = "your-secret-key-change-this-in-production"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = 30
     
     # CORS 설정
     allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8080"]
@@ -24,6 +24,18 @@ class Settings(BaseSettings):
     # 파일 업로드 설정
     max_file_size: int = 10 * 1024 * 1024  # 10MB
     upload_dir: str = "uploads"
+    
+    # OAuth 설정
+    google_client_id: Optional[str] = None
+    google_client_secret: Optional[str] = None
+    
+    kakao_client_id: Optional[str] = None
+    kakao_client_secret: Optional[str] = None
+    
+    apple_client_id: Optional[str] = None
+    apple_team_id: Optional[str] = None
+    apple_key_id: Optional[str] = None
+    apple_private_key: Optional[str] = None
     
     # AWS S3 설정 (선택사항)
     aws_access_key_id: Optional[str] = None
@@ -33,6 +45,16 @@ class Settings(BaseSettings):
     
     # 외부 API 설정
     openai_api_key: Optional[str] = None
+
+    # OAuth 설정 추가
+    google_client_id: Optional[str] = None          
+    google_client_secret: Optional[str] = None      
+    kakao_client_id: Optional[str] = None          
+    kakao_client_secret: Optional[str] = None      
+    apple_client_id: Optional[str] = None          
+    apple_team_id: Optional[str] = None            
+    apple_key_id: Optional[str] = None             
+    apple_private_key: Optional[str] = None        
     
     class Config:
         env_file = ".env"

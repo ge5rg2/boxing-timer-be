@@ -30,11 +30,23 @@ from .workout import (
     WorkoutLogResponse, WorkoutHistoryResponse, WorkoutRoundLogResponse
 )
 
+# OAuth 스키마들 추가
+from .oauth import (
+    GoogleLoginRequest, KakaoLoginRequest, AppleLoginRequest,
+    OAuthAccountResponse, OAuthProviderResponse, OAuthUnlinkRequest,
+    OAuthURLRequest, OAuthURLResponse
+)
+
+# migration schemas
+from .migration import (
+    MigrationPreviewRequest, MigrationPreviewResponse, MigrationExecuteRequest,
+    MigrationResultResponse, MigrationHistoryResponse, MigrationLogDetailResponse,
+    CleanupResultResponse, MigrationStatsResponse
+)
 # Common response schemas
 from .response import (
     ApiResponse, PaginatedResponse, PaginationMeta, ErrorResponse
 )
-
 __all__ = [
     # User
     "UserRegister", "UserLogin", "PasswordChange", "UserUpdate",
@@ -53,6 +65,16 @@ __all__ = [
     # Workout
     "WorkoutStart", "WorkoutComplete", "WorkoutPause",
     "WorkoutLogResponse", "WorkoutHistoryResponse", "WorkoutRoundLogResponse",
+
+    # OAuth 추가
+    "GoogleLoginRequest", "KakaoLoginRequest", "AppleLoginRequest",
+    "OAuthAccountResponse", "OAuthProviderResponse", "OAuthUnlinkRequest", 
+    "OAuthURLRequest", "OAuthURLResponse",
+
+    # Migration
+    "MigrationPreviewRequest", "MigrationPreviewResponse", "MigrationExecuteRequest",
+    "MigrationResultResponse", "MigrationHistoryResponse", "MigrationLogDetailResponse",
+    "CleanupResultResponse", "MigrationStatsResponse"
     
     # Response
     "ApiResponse", "PaginatedResponse", "PaginationMeta", "ErrorResponse"
