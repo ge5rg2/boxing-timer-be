@@ -57,16 +57,16 @@ class RoundCombinationResponse(BaseModel):
 class CycleCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
-    total_rounds: int = Field(..., ge=1)
-    cycle_rest_seconds: int = Field(default=60, ge=0)
+    total_rounds: int = Field(default=3, ge=1, le=20) # 최대 20라운드
+    cycle_rest_seconds: int = Field(default=60, ge=0, le=600) # 최대 10분 휴식
 
 
 # 사이클 업데이트
 class CycleUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
-    total_rounds: Optional[int] = Field(None, ge=1)
-    cycle_rest_seconds: Optional[int] = Field(None, ge=0)
+    total_rounds: Optional[int] = Field(None, ge=1, le=20)
+    cycle_rest_seconds: Optional[int] = Field(None, ge=0, le=600)
 
 
 # 사이클 응답 (라운드 포함)

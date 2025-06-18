@@ -1,14 +1,13 @@
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from app.database import get_db
 from app.models import User, UserCycle, UserRound
 from app.schemas.cycle import (
     RoundCreate, RoundUpdate, RoundResponse
 )
 from app.schemas.response import ApiResponse
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_session_id
 
 router = APIRouter()
 
@@ -17,6 +16,7 @@ router = APIRouter()
 async def get_rounds(
     cycle_id: int,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """해당 사이클의 라운드 목록 조회"""
@@ -27,14 +27,12 @@ async def get_rounds(
     )
     
     if current_user:
-        cycle_query = cycle_query.filter(
-            or_(
-                UserCycle.user_id == current_user.id,
-                UserCycle.user_id.is_(None)
-            )
-        )
+        cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
     else:
-        cycle_query = cycle_query.filter(UserCycle.user_id.is_(None))
+        cycle_query = cycle_query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = cycle_query.first()
     if not cycle:
@@ -59,10 +57,11 @@ async def create_round(
     cycle_id: int,
     round_data: RoundCreate,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """라운드 추가"""
-    # 사이클 권한 확인 (수정 권한 필요)
+    # 사이클 권한 확인
     cycle_query = db.query(UserCycle).filter(
         UserCycle.id == cycle_id,
         UserCycle.deleted_at.is_(None)
@@ -71,7 +70,10 @@ async def create_round(
     if current_user:
         cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
     else:
-        cycle_query = cycle_query.filter(UserCycle.user_id.is_(None))
+        cycle_query = cycle_query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = cycle_query.first()
     if not cycle:
@@ -90,6 +92,13 @@ async def create_round(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Round number already exists"
+        )
+    
+    # 사이클 최대 라운드 수 확인
+    if round_data.round_number > cycle.total_rounds:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Round number exceeds total rounds ({cycle.total_rounds})"
         )
     
     # 새 라운드 생성
@@ -116,6 +125,7 @@ async def update_round(
     round_id: int,
     round_data: RoundUpdate,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """라운드 수정"""
@@ -128,7 +138,10 @@ async def update_round(
     if current_user:
         cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
     else:
-        cycle_query = cycle_query.filter(UserCycle.user_id.is_(None))
+        cycle_query = cycle_query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = cycle_query.first()
     if not cycle:
@@ -168,6 +181,7 @@ async def delete_round(
     cycle_id: int,
     round_id: int,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """라운드 삭제"""
@@ -180,7 +194,10 @@ async def delete_round(
     if current_user:
         cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
     else:
-        cycle_query = cycle_query.filter(UserCycle.user_id.is_(None))
+        cycle_query = cycle_query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = cycle_query.first()
     if not cycle:
