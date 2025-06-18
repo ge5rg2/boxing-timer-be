@@ -7,6 +7,7 @@ from app.api import v1_router
 from app.schemas.response import ErrorResponse
 
 # FastAPI 앱 인스턴스 생성
+print(settings.database_url)
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
@@ -26,12 +27,22 @@ app.add_middleware(
 # 전역 예외 핸들러
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
+    # 문자열 또는 dict인지 구분
+    if isinstance(exc.detail, dict):
+        error_code = exc.detail.get("error", "http_exception")
+        message = exc.detail.get("message", "Request failed")
+        detail = exc.detail.get("detail")
+    else:
+        error_code = "http_exception"
+        message = str(exc.detail)
+        detail = None
+
     return JSONResponse(
         status_code=exc.status_code,
         content=ErrorResponse(
-            message="Request failed",
-            error=exc.detail,
-            detail=getattr(exc, 'detail', None)
+            message=message,
+            error=error_code,
+            detail=detail
         ).dict()
     )
 

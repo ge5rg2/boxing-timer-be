@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     debug: bool = False
     
     # 데이터베이스 설정
-    database_url: str = "postgresql://user:password@localhost/boxing_timer"
+    database_url: str = "postgresql://postgres:1234@localhost:5432/boxing_timer"
     
     # JWT 설정
     secret_key: str = "your-secret-key-change-this-in-production"

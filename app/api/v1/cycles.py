@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app import get_db
+from app.database import get_db
 from app.models import User, UserCycle
 from app.schemas import (
     CycleCreate, CycleUpdate, CycleResponse, CycleListResponse
@@ -97,13 +97,14 @@ async def create_cycle(
 async def get_cycle(
     cycle_id: int,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 상세 조회"""
     query = db.query(UserCycle).filter(
-        UserCycle.id == cycle_id,
-        UserCycle.deleted_at.is_(None)
-    )
+            UserCycle.id == cycle_id,
+            UserCycle.deleted_at.is_(None)
+        )
     
     # 권한 확인
     if current_user:
@@ -114,7 +115,10 @@ async def get_cycle(
             )
         )
     else:
-        query = query.filter(UserCycle.user_id.is_(None))
+        query = query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = query.first()
     if not cycle:
@@ -134,6 +138,7 @@ async def update_cycle(
     cycle_id: int,
     cycle_data: CycleUpdate,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 수정"""
@@ -146,7 +151,10 @@ async def update_cycle(
     if current_user:
         query = query.filter(UserCycle.user_id == current_user.id)
     else:
-        query = query.filter(UserCycle.user_id.is_(None))
+        query = query.filter(
+            UserCycle.user_id.is_(None), 
+            UserCycle.session_id == session_id
+        )
     
     cycle = query.first()
     if not cycle:
@@ -173,6 +181,7 @@ async def update_cycle(
 async def delete_cycle(
     cycle_id: int,
     current_user: Optional[User] = Depends(get_current_user),
+    session_id: str = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 삭제 (소프트 삭제)"""
@@ -185,7 +194,10 @@ async def delete_cycle(
     if current_user:
         query = query.filter(UserCycle.user_id == current_user.id)
     else:
-        query = query.filter(UserCycle.user_id.is_(None))
+        query = query.filter(
+            UserCycle.user_id.is_(None),
+            UserCycle.session_id == session_id
+        )
     
     cycle = query.first()
     if not cycle:

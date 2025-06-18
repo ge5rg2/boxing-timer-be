@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  # 개발용 - 데이터베이스만
+  db:
+    image: postgres:15
+    container_name: boxing-timer-db-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: boxing_timer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:

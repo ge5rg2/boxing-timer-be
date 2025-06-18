@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -12,28 +12,28 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=True)  # OAuth 사용자는 null 가능
     name = Column(String(255))  # 이름 추가
-    profile_image_url = Column(String(500))  # 프로필 이미지
-    signup_method = Column(String(20), default='email')  # 가입 방법 구분
-    is_email_verified = Column(Boolean, default=False)  # 이메일 인증 여부
+    profile_image_url = Column(String(500))  # 프로필 이미지 추가
     is_premium = Column(Boolean, default=False, nullable=False)
+    is_email_verified = Column(Boolean, default=False, nullable=False)  # 이메일 인증 여부
+    signup_method = Column(String(20), default='email', nullable=False)  # 'email', 'oauth'
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-
+    
     # 관계 설정
     cycles = relationship("UserCycle", back_populates="user")
     combinations = relationship("UserCombination", back_populates="user")
     subscriptions = relationship("Subscription", back_populates="user")
     workout_logs = relationship("WorkoutLog", back_populates="user")
-    oauth_accounts = relationship("UserOAuthAccount", back_populates="user")  # OAuth 계정 연결
-
+    oauth_accounts = relationship("UserOAuthAccount", back_populates="user")
+    migration_logs = relationship("MigrationLog", back_populates="user")
 
 class Subscription(Base):
     """구독 정보 모델"""
     __tablename__ = "subscriptions"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"),nullable=False, index=True)
     plan_type = Column(String(50), nullable=False)  # 'monthly', 'yearly', 'lifetime'
     started_at = Column(DateTime(timezone=True), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=True)  # lifetime의 경우 null

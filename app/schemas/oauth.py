@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # OAuth 로그인 요청
@@ -31,7 +31,7 @@ class OAuthUserInfo(BaseModel):
 
 # OAuth 계정 연결 응답
 class OAuthAccountResponse(BaseModel):
-    model_config = BaseModel.ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     provider_name: str
@@ -45,7 +45,7 @@ class OAuthAccountResponse(BaseModel):
 
 # OAuth 제공자 정보
 class OAuthProviderResponse(BaseModel):
-    model_config = BaseModel.ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
     
     id: int
     name: str

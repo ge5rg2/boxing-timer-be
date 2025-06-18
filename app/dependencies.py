@@ -9,14 +9,23 @@ from fastapi import Header
 
 security = HTTPBearer(auto_error=False)
 
-def get_session_id(x_session_id: Optional[str] = Header(None)) -> str:
-    """세션 ID 조회 또는 생성"""
-    if x_session_id:
-        return x_session_id
-    else:
-        # 새 세션 ID 생성
-        import uuid
-        return str(uuid.uuid4())
+def get_session_id(
+    x_session_id: Optional[str] = Header(None, alias="X-Session-ID")
+) -> Optional[str]:
+    """기기별 영구 세션 ID (만료 없음)"""
+    
+    # 세션 ID가 없으면 클라이언트에서 생성하도록 안내
+    if not x_session_id:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "device_session_required",
+                "message": "Please generate a device session ID in the app",
+                "detail": "The X-Session-ID header is required for device-specific sessions"
+            }
+        )
+
+    return x_session_id
 
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),

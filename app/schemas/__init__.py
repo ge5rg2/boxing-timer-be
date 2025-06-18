@@ -34,7 +34,7 @@ from .workout import (
 from .oauth import (
     GoogleLoginRequest, KakaoLoginRequest, AppleLoginRequest,
     OAuthAccountResponse, OAuthProviderResponse, OAuthUnlinkRequest,
-    OAuthURLRequest, OAuthURLResponse
+    OAuthURLRequest, OAuthURLResponse, OAuthUserInfo
 )
 
 # migration schemas
@@ -69,12 +69,12 @@ __all__ = [
     # OAuth 추가
     "GoogleLoginRequest", "KakaoLoginRequest", "AppleLoginRequest",
     "OAuthAccountResponse", "OAuthProviderResponse", "OAuthUnlinkRequest", 
-    "OAuthURLRequest", "OAuthURLResponse",
+    "OAuthURLRequest", "OAuthURLResponse", "OAuthUserInfo",
 
     # Migration
     "MigrationPreviewRequest", "MigrationPreviewResponse", "MigrationExecuteRequest",
     "MigrationResultResponse", "MigrationHistoryResponse", "MigrationLogDetailResponse",
-    "CleanupResultResponse", "MigrationStatsResponse"
+    "CleanupResultResponse", "MigrationStatsResponse",
     
     # Response
     "ApiResponse", "PaginatedResponse", "PaginationMeta", "ErrorResponse"
