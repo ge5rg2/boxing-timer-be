@@ -15,9 +15,10 @@ class UserCycle(Base):
     session_id = Column(String(100), nullable=True, index=True)  # 비회원용 세션 ID 추가
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    total_rounds = Column(Integer, nullable=False)
+    total_rounds = Column(Integer, default=3, nullable=False)
+    cycle_count = Column(Integer, default=1, nullable=False)  # 사이클 실행 횟수
     usage_count = Column(Integer, nullable=True)
-    cycle_rest_seconds = Column(Integer, default=60)
+    cycle_rest_seconds = Column(Integer, default=60, nullable=False)  # 사이클 간 휴식 시간 (초 단위)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at = Column(DateTime(timezone=True), nullable=True)
@@ -34,8 +35,8 @@ class UserRound(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_cycle_id = Column(Integer, ForeignKey("user_cycles.id"), nullable=False)
     round_number = Column(Integer, nullable=False)
-    duration_seconds = Column(Integer, nullable=False)
-    rest_seconds = Column(Integer, nullable=False)
+    duration_seconds = Column(Integer, default=180, nullable=False)
+    rest_seconds = Column(Integer, default=60 ,nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
     # 관계 설정
@@ -67,9 +68,10 @@ class CycleTemplate(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    total_rounds = Column(Integer, nullable=False)
+    total_rounds = Column(Integer, default=3, nullable=False)
+    cycle_count = Column(Integer, default=1, nullable=False)  # 사이클 실행 횟수
     usage_count = Column(Integer, nullable=True)
-    cycle_rest_seconds = Column(Integer, default=60)
+    cycle_rest_seconds = Column(Integer, default=60, nullable=False)
     difficulty_level = Column(String(20), default='beginner')  # beginner, intermediate, advanced
     category = Column(String(50))  # 'cardio', 'technique', 'power' 등
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -90,8 +92,8 @@ class RoundTemplate(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     cycle_template_id = Column(Integer, ForeignKey("cycle_templates.id"), nullable=False)
     round_number = Column(Integer, nullable=False)
-    duration_seconds = Column(Integer, nullable=False)
-    rest_seconds = Column(Integer, nullable=False)
+    duration_seconds = Column(Integer, default=180, nullable=False)
+    rest_seconds = Column(Integer, default=60 ,nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     
     # 관계 설정

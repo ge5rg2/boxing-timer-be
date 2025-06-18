@@ -6,13 +6,13 @@ from pydantic import BaseModel, Field, ConfigDict
 # 라운드 생성/업데이트
 class RoundCreate(BaseModel):
     round_number: int = Field(..., ge=1)
-    duration_seconds: int = Field(..., ge=1)
-    rest_seconds: int = Field(..., ge=0)
+    duration_seconds: int = Field(default=180, ge=30, le=600)  # 최소 30초, 최대 10분
+    rest_seconds: int = Field(default=60, ge=30, le=300)  # 최소 30초, 최대 5분
 
 
 class RoundUpdate(BaseModel):
-    duration_seconds: Optional[int] = Field(None, ge=1)
-    rest_seconds: Optional[int] = Field(None, ge=0)
+    duration_seconds: Optional[int] = Field(None, ge=30)
+    rest_seconds: Optional[int] = Field(None, ge=30)
 
 
 # 라운드 응답
@@ -59,6 +59,7 @@ class CycleCreate(BaseModel):
     description: Optional[str] = None
     total_rounds: int = Field(default=3, ge=1, le=20) # 최대 20라운드
     cycle_rest_seconds: int = Field(default=60, ge=0, le=600) # 최대 10분 휴식
+    cycle_count: int = Field(default=1, ge=1, le=10)  # 사이클 실행 횟수 (최대 10회)
 
 
 # 사이클 업데이트
@@ -67,6 +68,7 @@ class CycleUpdate(BaseModel):
     description: Optional[str] = None
     total_rounds: Optional[int] = Field(None, ge=1, le=20)
     cycle_rest_seconds: Optional[int] = Field(None, ge=0, le=600)
+    cycle_count: int = Field(None, ge=1, le=10)  # 사이클 실행 횟수 (최대 10회)
 
 
 # 사이클 응답 (라운드 포함)
@@ -78,6 +80,7 @@ class CycleResponse(BaseModel):
     description: Optional[str]
     total_rounds: int
     usage_count: Optional[int]
+    cycle_count: int
     cycle_rest_seconds: int
     created_at: datetime
     updated_at: datetime
@@ -108,6 +111,7 @@ class CycleTemplateResponse(BaseModel):
     title: str
     description: Optional[str]
     total_rounds: int
+    cycle_count: int
     cycle_rest_seconds: int
     difficulty_level: str
     category: Optional[str]

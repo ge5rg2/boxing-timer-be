@@ -8,6 +8,7 @@ from app.schemas.cycle import (
 )
 from app.schemas.response import ApiResponse
 from app.dependencies import get_current_user, get_session_id
+from app.services.round_service import get_rounds_service, create_round_service
 
 router = APIRouter()
 
@@ -20,31 +21,7 @@ async def get_rounds(
     db: Session = Depends(get_db)
 ):
     """해당 사이클의 라운드 목록 조회"""
-    # 사이클 권한 확인
-    cycle_query = db.query(UserCycle).filter(
-        UserCycle.id == cycle_id,
-        UserCycle.deleted_at.is_(None)
-    )
-    
-    if current_user:
-        cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
-    else:
-        cycle_query = cycle_query.filter(
-            UserCycle.user_id.is_(None),
-            UserCycle.session_id == session_id
-        )
-    
-    cycle = cycle_query.first()
-    if not cycle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Cycle not found"
-        )
-    
-    # 라운드 목록 조회
-    rounds = db.query(UserRound).filter(
-        UserRound.user_cycle_id == cycle_id
-    ).order_by(UserRound.round_number).all()
+    rounds = get_rounds_service(db, cycle_id, current_user, session_id)
     
     return ApiResponse(
         message="Rounds retrieved successfully",
@@ -62,56 +39,13 @@ async def create_round(
 ):
     """라운드 추가"""
     # 사이클 권한 확인
-    cycle_query = db.query(UserCycle).filter(
-        UserCycle.id == cycle_id,
-        UserCycle.deleted_at.is_(None)
+    new_round = create_round_service(
+        cycle_id=cycle_id,
+        data=round_data,
+        user=current_user,
+        session_id=session_id,
+        db=db
     )
-    
-    if current_user:
-        cycle_query = cycle_query.filter(UserCycle.user_id == current_user.id)
-    else:
-        cycle_query = cycle_query.filter(
-            UserCycle.user_id.is_(None),
-            UserCycle.session_id == session_id
-        )
-    
-    cycle = cycle_query.first()
-    if not cycle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Cycle not found or no permission"
-        )
-    
-    # 중복 라운드 번호 확인
-    existing_round = db.query(UserRound).filter(
-        UserRound.user_cycle_id == cycle_id,
-        UserRound.round_number == round_data.round_number
-    ).first()
-    
-    if existing_round:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Round number already exists"
-        )
-    
-    # 사이클 최대 라운드 수 확인
-    if round_data.round_number > cycle.total_rounds:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Round number exceeds total rounds ({cycle.total_rounds})"
-        )
-    
-    # 새 라운드 생성
-    new_round = UserRound(
-        user_cycle_id=cycle_id,
-        round_number=round_data.round_number,
-        duration_seconds=round_data.duration_seconds,
-        rest_seconds=round_data.rest_seconds
-    )
-    
-    db.add(new_round)
-    db.commit()
-    db.refresh(new_round)
     
     return ApiResponse(
         message="Round created successfully",
