@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.models import User, UserCycle, UserRound
-from app.schemas import RoundCreate, UserRound, RoundUpdate, RoundResponse
+from app.schemas import RoundCreate, RoundUpdate, RoundResponse
 from fastapi import HTTPException, status
 from app.core.utils import filter_user_cycle_by_auth
 
@@ -80,13 +80,65 @@ def update_round_service(
     user: Optional[User],
     session_id: str,
     db: Session
-): return None
+) -> RoundResponse: 
+    data_by_id = db.query(UserCycle).filter(UserCycle.id == cycle_id)
+    query = filter_user_cycle_by_auth(data_by_id, user, session_id)
+    cycle = query.first()
+    if not cycle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cycle not found or no permission"
+        )
+    
+    # 라운드 조회
+    round_obj = db.query(UserRound).filter(
+        UserRound.id == round_id,
+        UserRound.user_cycle_id == cycle_id
+    ).first()
+
+    if not round_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Round not found"
+        )
+    # 업데이트
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(round_obj, field, value)
+    
+    db.commit()
+    db.refresh(round_obj)
+
+    return round_obj
 
 def delete_round_service(
     cycle_id: int,
     round_id: int,
-    data: RoundUpdate,
     user: Optional[User],
     session_id: str,
     db: Session
-): return None
+): 
+    data_by_id = db.query(UserCycle).filter(UserCycle.id == cycle_id)
+    query = filter_user_cycle_by_auth(data_by_id, user, session_id)
+    cycle = query.first()
+    if not cycle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cycle not found or no permission"
+        )
+        
+    # 라운드 조회 및 삭제
+    round_obj = db.query(UserRound).filter(
+        UserRound.id == round_id,
+        UserRound.user_cycle_id == cycle_id
+    ).first()
+    
+    if not round_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Round not found"
+        )
+    db.delete(round_obj)
+    db.commit()
+    
+    return None

@@ -29,7 +29,7 @@ class CombinationResponse(BaseModel):
     title: str
     description: Optional[str]
     audio_url: Optional[str]
-    audio_duration_seconds: Optional[int]
+    audio_duration_seconds: Optional[int] # audio_duration_seconds -> duration_seconds
     audio_file_size: Optional[int]
     created_at: datetime
     updated_at: datetime

@@ -11,8 +11,8 @@ class RoundCreate(BaseModel):
 
 
 class RoundUpdate(BaseModel):
-    duration_seconds: Optional[int] = Field(None, ge=30)
-    rest_seconds: Optional[int] = Field(None, ge=30)
+    duration_seconds: Optional[int] = Field(None, ge=30, le=600)
+    rest_seconds: Optional[int] = Field(None, ge=30, le=300)
 
 
 # 라운드 응답

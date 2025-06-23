@@ -66,6 +66,7 @@ def create_cycle_service(
         title=data.title,
         description=data.description,
         total_rounds=data.total_rounds,
+        cycle_count=data.cycle_count,
         cycle_rest_seconds=data.cycle_rest_seconds
     )
     db.add(new_cycle)     # INSERT 쿼리가 "준비됨"

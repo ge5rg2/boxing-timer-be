@@ -19,7 +19,7 @@ async def get_cycles(
     per_page: int = Query(10, ge=1, le=100),
     search: Optional[str] = Query(None),
     current_user: Optional[User] = Depends(get_current_user),
-    session_id: str = Depends(get_session_id),
+    session_id: Optional[str] = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 목록 조회"""
@@ -35,7 +35,7 @@ async def get_cycles(
 async def create_cycle(
     cycle_data: CycleCreate,
     current_user: Optional[User] = Depends(get_current_user),
-    session_id: str = Depends(get_session_id),
+    session_id: Optional[str] = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """새 사이클 생성"""
@@ -50,7 +50,7 @@ async def create_cycle(
 async def get_cycle(
     cycle_id: int,
     current_user: Optional[User] = Depends(get_current_user),
-    session_id: str = Depends(get_session_id),
+    session_id: Optional[str] = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 상세 조회"""
@@ -67,7 +67,7 @@ async def update_cycle(
     cycle_id: int,
     cycle_data: CycleUpdate,
     current_user: Optional[User] = Depends(get_current_user),
-    session_id: str = Depends(get_session_id),
+    session_id: Optional[str] = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 수정"""
@@ -83,7 +83,7 @@ async def update_cycle(
 async def delete_cycle(
     cycle_id: int,
     current_user: Optional[User] = Depends(get_current_user),
-    session_id: str = Depends(get_session_id),
+    session_id: Optional[str] = Depends(get_session_id),
     db: Session = Depends(get_db)
 ):
     """사이클 삭제 (소프트 삭제)"""
